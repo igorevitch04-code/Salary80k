@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Личный Ассистент</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #0f0f13;
+      --card: #1a1a22;
+      --card2: #22222c;
+      --text: #ffffff;
+      --muted: #8b8b9e;
+      --accent: #6c5ce7;
+      --green: #00b894;
+      --red: #ff6b6b;
+      --border: #2a2a36;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    .header {
+      padding: 16px 20px 8px;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .header .sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+
+    .tab {
+      padding: 8px 14px;
+      border-radius: 20px;
+      background: var(--card);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .content {
+      padding: 8px 16px 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .big-number {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .big-number .currency {
+      font-size: 16px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .row:last-child { border-bottom: none; }
+
+    .row .name {
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .row .value {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .row .value.green { color: var(--green); }
+    .row .value.red { color: var(--red); }
+
+    .period-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .period-tabs .ptab {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      border-radius: 10px;
+      background: var(--card2);
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .period-tabs .ptab.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .note-item {
+      background: var(--card2);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .note-item .time {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .reminder-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .reminder-item:last-child { border-bottom: none; }
+    .reminder-time {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+      min-width: 60px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex;
+      padding: 8px 0 20px;
+      z-index: 20;
+    }
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 6px 0;
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-item .icon {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Ассистент</h1>
+    <div class="sub" id="subtitle">Личные финансы и проекты</div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="section active" id="sec-dashboard">
+    <div class="content">
+      <div class="card">
+        <div class="card-title">Общий капитал</div>
+        <div class="big-number" id="total-capital">— <span class="currency">$</span></div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px" id="total-capital-byn"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Расходы на жизнь (сегодня)</div>
+        <div class="big-number" id="today-expenses">— <span class="currency">BYN</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Профит по проектам (месяц)</div>
+        <div class="big-number" id="month-profit">— <span class="currency">$</span></div>
+      </div>
+
+      <div class="hint">
+        Данные появляются после того, как ты запишешь их через чат с ботом<br>
+        (потратил..., крипта +..., капитал...)
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div class="section" id="sec-expenses">
+    <div class="content">
+      <div class="period-tabs">
+        <div class="ptab active" data-period="day">День</div>
+        <div class="ptab" data-period="week">Неделя</div>
+        <div class="ptab" data-period="month">Месяц</div>
+        <div class="ptab" data-period="year">Год</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Итого</div>
+        <div class="big-number" id="expenses-total">0 <span class="currency">BYN</span></div>
+      </div>
+
+      <div class="card" id="expenses-list">
+        <div class="empty">Пока нет расходов.<br>Напиши боту: «потратил 45 на продукты»</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAPITAL -->
+  <div class="section" id="sec-capital">
+    <div class="content">
+      <div class="card">
+        <div class="card-title">Общий капитал</div>
+        <div class="big-number" id="cap-total-usd">0 <span class="currency">$</span></div>
+        <div style="font-size:14px;color:var(--muted);margin-top:4px" id="cap-total-byn">0 BYN</div>
+      </div>
+
+      <div class="card" id="capital-list">
+        <div class="empty">Капитал пока не добавлен.<br>Напиши: «капитал крипта 4500$»</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROJECTS -->
+  <div class="section" id="sec-projects">
+    <div class="content">
+      <div class="period-tabs" id="proj-periods">
+        <div class="ptab active" data-period="day">День</div>
+        <div class="ptab" data-period="week">Неделя</div>
+        <div class="ptab" data-period="month">Месяц</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Общий профит</div>
+        <div class="big-number" id="proj-total">0 <span class="currency">$</span></div>
+      </div>
+
+      <div class="card" id="projects-list">
+        <div class="empty">Проектов пока нет.<br>Напиши: «крипта +150$»</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="section" id="sec-notes">
+    <div class="content">
+      <div id="notes-list">
+        <div class="empty">Заметок пока нет.<br>Напиши: «заметка: текст»</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REMINDERS -->
+  <div class="section" id="sec-reminders">
+    <div class="content">
+      <div class="card" id="reminders-list">
+        <div class="empty">Напоминаний нет.<br>Напиши: «напомни завтра в 11 созвон»</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" data-sec="dashboard">
+      <span class="icon">⌂</span>Главная
+    </div>
+    <div class="nav-item" data-sec="expenses">
+      <span class="icon">₴</span>Расходы
+    </div>
+    <div class="nav-item" data-sec="capital">
+      <span class="icon">◈</span>Капитал
+    </div>
+    <div class="nav-item" data-sec="projects">
+      <span class="icon">↗</span>Проекты
+    </div>
+    <div class="nav-item" data-sec="notes">
+      <span class="icon">✎</span>Заметки
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    tg.setHeaderColor('#0f0f13');
+    tg.setBackgroundColor('#0f0f13');
+
+    // Навигация
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        item.classList.add('active');
+        document.getElementById('sec-' + item.dataset.sec).classList.add('active');
+      });
+    });
+
+    // Периоды расходов
+    document.querySelectorAll('.period-tabs .ptab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        tab.parentElement.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        // Здесь будет загрузка данных с бэкенда
+      });
+    });
+
+    // Пока Mini App работает в демо-режиме.
+    // В полной версии данные будут подтягиваться через API бота / initData.
+    // Для реального использования нужно поднять небольшой backend (FastAPI),
+    // который принимает initData от Telegram и отдаёт JSON.
+
+    document.getElementById('subtitle').textContent = 'Данные синхронизируются с ботом';
+  </script>
+</body>
+</html>
