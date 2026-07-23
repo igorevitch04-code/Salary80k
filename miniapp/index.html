@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Личный Ассистент</title>
+  <title>Ассистент</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
@@ -17,70 +17,10 @@
       --red: #ff6b6b;
       --border: #2a2a36;
     }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 90px; }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding-bottom: 80px;
-    }
-
-    .header {
-      padding: 16px 20px 8px;
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 10;
-    }
-
-    .header h1 {
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .header .sub {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 6px;
-      padding: 12px 16px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .tabs::-webkit-scrollbar { display: none; }
-
-    .tab {
-      padding: 8px 14px;
-      border-radius: 20px;
-      background: var(--card);
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 500;
-      white-space: nowrap;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .tab.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
-
-    .content {
-      padding: 8px 16px 20px;
-    }
+    .content { padding: 16px 16px 20px; }
 
     .card {
       background: var(--card);
@@ -89,176 +29,108 @@
       margin-bottom: 12px;
       border: 1px solid var(--border);
     }
-
     .card-title {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--muted);
       margin-bottom: 8px;
       text-transform: uppercase;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.4px;
     }
-
     .big-number {
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 700;
       letter-spacing: -0.5px;
     }
+    .big-number .currency { font-size: 15px; color: var(--muted); font-weight: 500; }
 
-    .big-number .currency {
-      font-size: 16px;
-      color: var(--muted);
-      font-weight: 500;
+    .period-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+    .period-tabs .ptab {
+      flex: 1; text-align: center; padding: 9px 0;
+      border-radius: 10px; background: var(--card2);
+      font-size: 13px; color: var(--muted); cursor: pointer;
     }
+    .period-tabs .ptab.active { background: var(--accent); color: #fff; }
 
     .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 11px 0; border-bottom: 1px solid var(--border);
     }
     .row:last-child { border-bottom: none; }
-
-    .row .name {
-      font-size: 15px;
-      font-weight: 500;
-    }
-    .row .value {
-      font-size: 15px;
-      font-weight: 600;
-    }
+    .row .name { font-size: 14px; font-weight: 500; }
+    .row .value { font-size: 14px; font-weight: 600; }
     .row .value.green { color: var(--green); }
-    .row .value.red { color: var(--red); }
+    .row .meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-    .period-tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 14px;
-    }
-    .period-tabs .ptab {
-      flex: 1;
-      text-align: center;
-      padding: 8px;
-      border-radius: 10px;
-      background: var(--card2);
-      font-size: 13px;
-      color: var(--muted);
-      cursor: pointer;
-    }
-    .period-tabs .ptab.active {
-      background: var(--accent);
-      color: #fff;
-    }
+    .empty { text-align: center; padding: 36px 16px; color: var(--muted); font-size: 14px; line-height: 1.5; }
 
-    .empty {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--muted);
-      font-size: 14px;
+    .note-item, .reminder-item {
+      background: var(--card2); border-radius: 12px;
+      padding: 12px 14px; margin-bottom: 8px; font-size: 14px; line-height: 1.4;
     }
+    .note-item .time, .reminder-item .time { font-size: 11px; color: var(--muted); margin-top: 6px; }
 
-    .note-item {
-      background: var(--card2);
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 8px;
-      font-size: 14px;
-      line-height: 1.4;
+    /* Формы */
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 11px 12px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--card2);
+      color: var(--text); font-size: 15px; outline: none;
     }
-    .note-item .time {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 6px;
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--accent);
+    }
+    .btn {
+      width: 100%; padding: 13px; border: none; border-radius: 12px;
+      background: var(--accent); color: #fff; font-size: 15px;
+      font-weight: 600; cursor: pointer; margin-top: 4px;
+    }
+    .btn:active { opacity: 0.85; }
+    .btn-secondary {
+      background: var(--card2); color: var(--text); border: 1px solid var(--border);
+      margin-top: 8px;
     }
 
-    .reminder-item {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .reminder-item:last-child { border-bottom: none; }
-    .reminder-time {
-      font-size: 12px;
-      color: var(--accent);
-      font-weight: 600;
-      min-width: 60px;
-    }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--card);
-      border-top: 1px solid var(--border);
-      display: flex;
-      padding: 8px 0 20px;
-      z-index: 20;
-    }
-    .nav-item {
-      flex: 1;
-      text-align: center;
-      font-size: 11px;
-      color: var(--muted);
-      cursor: pointer;
-      padding: 6px 0;
-    }
-    .nav-item.active { color: var(--accent); }
-    .nav-item .icon {
-      font-size: 20px;
-      display: block;
-      margin-bottom: 2px;
+    .add-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; padding: 12px; border-radius: 12px;
+      background: var(--card2); border: 1px dashed var(--border);
+      color: var(--muted); font-size: 14px; cursor: pointer; margin-bottom: 14px;
     }
 
     .section { display: none; }
     .section.active { display: block; }
 
-    .hint {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 12px;
-      line-height: 1.4;
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--card); border-top: 1px solid var(--border);
+      display: flex; padding: 8px 0 22px; z-index: 20;
     }
+    .nav-item {
+      flex: 1; text-align: center; font-size: 11px;
+      color: var(--muted); cursor: pointer; padding: 6px 0;
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-item .icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 50; align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--card); border-radius: 20px 20px 0 0;
+      padding: 20px 16px 30px; width: 100%; max-width: 500px;
+    }
+    .modal h3 { font-size: 17px; margin-bottom: 16px; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Ассистент</h1>
-    <div class="sub" id="subtitle">Личные финансы и проекты</div>
-  </div>
 
-  <!-- DASHBOARD -->
-  <div class="section active" id="sec-dashboard">
+  <!-- РАСХОДЫ (главный экран) -->
+  <div class="section active" id="sec-expenses">
     <div class="content">
-      <div class="card">
-        <div class="card-title">Общий капитал</div>
-        <div class="big-number" id="total-capital">— <span class="currency">$</span></div>
-        <div style="font-size:13px;color:var(--muted);margin-top:4px" id="total-capital-byn"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Расходы на жизнь (сегодня)</div>
-        <div class="big-number" id="today-expenses">— <span class="currency">BYN</span></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Профит по проектам (месяц)</div>
-        <div class="big-number" id="month-profit">— <span class="currency">$</span></div>
-      </div>
-
-      <div class="hint">
-        Данные появляются после того, как ты запишешь их через чат с ботом<br>
-        (потратил..., крипта +..., капитал...)
-      </div>
-    </div>
-  </div>
-
-  <!-- EXPENSES -->
-  <div class="section" id="sec-expenses">
-    <div class="content">
-      <div class="period-tabs">
+      <div class="period-tabs" id="exp-periods">
         <div class="ptab active" data-period="day">День</div>
         <div class="ptab" data-period="week">Неделя</div>
         <div class="ptab" data-period="month">Месяц</div>
@@ -270,13 +142,15 @@
         <div class="big-number" id="expenses-total">0 <span class="currency">BYN</span></div>
       </div>
 
+      <div class="add-btn" onclick="openModal('expense')">+ Добавить расход</div>
+
       <div class="card" id="expenses-list">
-        <div class="empty">Пока нет расходов.<br>Напиши боту: «потратил 45 на продукты»</div>
+        <div class="empty">Пока нет расходов</div>
       </div>
     </div>
   </div>
 
-  <!-- CAPITAL -->
+  <!-- КАПИТАЛ -->
   <div class="section" id="sec-capital">
     <div class="content">
       <div class="card">
@@ -285,13 +159,15 @@
         <div style="font-size:14px;color:var(--muted);margin-top:4px" id="cap-total-byn">0 BYN</div>
       </div>
 
+      <div class="add-btn" onclick="openModal('capital')">+ Обновить капитал</div>
+
       <div class="card" id="capital-list">
-        <div class="empty">Капитал пока не добавлен.<br>Напиши: «капитал крипта 4500$»</div>
+        <div class="empty">Капитал пока не добавлен</div>
       </div>
     </div>
   </div>
 
-  <!-- PROJECTS -->
+  <!-- ПРОЕКТЫ -->
   <div class="section" id="sec-projects">
     <div class="content">
       <div class="period-tabs" id="proj-periods">
@@ -305,47 +181,46 @@
         <div class="big-number" id="proj-total">0 <span class="currency">$</span></div>
       </div>
 
+      <div class="add-btn" onclick="openModal('profit')">+ Добавить профит</div>
+
       <div class="card" id="projects-list">
-        <div class="empty">Проектов пока нет.<br>Напиши: «крипта +150$»</div>
+        <div class="empty">Проектов пока нет</div>
       </div>
     </div>
   </div>
 
-  <!-- NOTES -->
+  <!-- ЗАМЕТКИ -->
   <div class="section" id="sec-notes">
     <div class="content">
+      <div class="add-btn" onclick="openModal('note')">+ Новая заметка</div>
       <div id="notes-list">
-        <div class="empty">Заметок пока нет.<br>Напиши: «заметка: текст»</div>
+        <div class="empty">Заметок пока нет</div>
       </div>
     </div>
   </div>
 
-  <!-- REMINDERS -->
+  <!-- НАПОМИНАНИЯ -->
   <div class="section" id="sec-reminders">
     <div class="content">
+      <div class="add-btn" onclick="openModal('reminder')">+ Новое напоминание</div>
       <div class="card" id="reminders-list">
-        <div class="empty">Напоминаний нет.<br>Напиши: «напомни завтра в 11 созвон»</div>
+        <div class="empty">Напоминаний нет</div>
       </div>
     </div>
   </div>
 
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
-    <div class="nav-item active" data-sec="dashboard">
-      <span class="icon">⌂</span>Главная
-    </div>
-    <div class="nav-item" data-sec="expenses">
-      <span class="icon">₴</span>Расходы
-    </div>
-    <div class="nav-item" data-sec="capital">
-      <span class="icon">◈</span>Капитал
-    </div>
-    <div class="nav-item" data-sec="projects">
-      <span class="icon">↗</span>Проекты
-    </div>
-    <div class="nav-item" data-sec="notes">
-      <span class="icon">✎</span>Заметки
-    </div>
+    <div class="nav-item active" data-sec="expenses"><span class="icon">₴</span>Расходы</div>
+    <div class="nav-item" data-sec="capital"><span class="icon">◈</span>Капитал</div>
+    <div class="nav-item" data-sec="projects"><span class="icon">↗</span>Проекты</div>
+    <div class="nav-item" data-sec="notes"><span class="icon">✎</span>Заметки</div>
+    <div class="nav-item" data-sec="reminders"><span class="icon">🔔</span>Напомин.</div>
+  </div>
+
+  <!-- МОДАЛКИ -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal" id="modal-content"></div>
   </div>
 
   <script>
@@ -355,31 +230,353 @@
     tg.setHeaderColor('#0f0f13');
     tg.setBackgroundColor('#0f0f13');
 
-    // Навигация
+    // ========== НАСТРОЙКИ API ==========
+    // Пока API не задеплоен — данные будут локальные (localStorage) + попытка запроса
+    // Когда задеплоишь api.py — поставь сюда URL
+    const API_URL = localStorage.getItem('API_URL') || '';
+
+    const initData = tg.initData || '';
+
+    async function api(method, path, body = null) {
+      if (!API_URL) {
+        // fallback на localStorage
+        return localFallback(method, path, body);
+      }
+      const opts = {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Telegram-Init-Data': initData
+        }
+      };
+      if (body) opts.body = JSON.stringify(body);
+      const res = await fetch(API_URL + path, opts);
+      if (!res.ok) throw new Error('API error');
+      return res.json();
+    }
+
+    // Простой fallback на localStorage, пока нет сервера
+    function localFallback(method, path, body) {
+      const store = JSON.parse(localStorage.getItem('pa_data') || '{}');
+      if (!store.expenses) store.expenses = [];
+      if (!store.capital) store.capital = [];
+      if (!store.projects) store.projects = [];
+      if (!store.notes) store.notes = [];
+      if (!store.reminders) store.reminders = [];
+
+      if (method === 'GET' && path.startsWith('/api/expenses')) {
+        const period = new URLSearchParams(path.split('?')[1] || '').get('period') || 'day';
+        const now = new Date();
+        let items = store.expenses;
+        // простая фильтрация по периоду опускаем для MVP
+        const total = items.reduce((s, i) => s + i.amount, 0);
+        return Promise.resolve({ items, total, period });
+      }
+      if (method === 'POST' && path === '/api/expenses') {
+        store.expenses.unshift({ ...body, created_at: new Date().toISOString(), id: Date.now() });
+        localStorage.setItem('pa_data', JSON.stringify(store));
+        return Promise.resolve({ ok: true });
+      }
+      if (method === 'GET' && path === '/api/capital') {
+        const total = { usd: 0, byn: 0 };
+        store.capital.forEach(c => { total.usd += c.amount_usd || 0; total.byn += c.amount_byn || 0; });
+        return Promise.resolve({ items: store.capital, total });
+      }
+      if (method === 'POST' && path === '/api/capital') {
+        const idx = store.capital.findIndex(c => c.name === body.name);
+        if (idx >= 0) store.capital[idx] = body;
+        else store.capital.push(body);
+        localStorage.setItem('pa_data', JSON.stringify(store));
+        return Promise.resolve({ ok: true });
+      }
+      if (method === 'GET' && path.startsWith('/api/projects')) {
+        const map = {};
+        store.projects.forEach(p => {
+          if (!map[p.project]) map[p.project] = { name: p.project, usd: 0, byn: 0 };
+          map[p.project].usd += p.amount_usd || 0;
+          map[p.project].byn += p.amount_byn || 0;
+        });
+        const projects = Object.values(map);
+        const total = projects.reduce((s, p) => ({ usd: s.usd + p.usd, byn: s.byn + p.byn }), { usd: 0, byn: 0 });
+        return Promise.resolve({ projects, total });
+      }
+      if (method === 'POST' && path === '/api/projects') {
+        store.projects.unshift({ ...body, created_at: new Date().toISOString() });
+        localStorage.setItem('pa_data', JSON.stringify(store));
+        return Promise.resolve({ ok: true });
+      }
+      if (method === 'GET' && path === '/api/notes') {
+        return Promise.resolve({ items: store.notes });
+      }
+      if (method === 'POST' && path === '/api/notes') {
+        store.notes.unshift({ text: body.text, created_at: new Date().toISOString(), id: Date.now() });
+        localStorage.setItem('pa_data', JSON.stringify(store));
+        return Promise.resolve({ ok: true });
+      }
+      if (method === 'GET' && path === '/api/reminders') {
+        return Promise.resolve({ items: store.reminders });
+      }
+      if (method === 'POST' && path === '/api/reminders') {
+        store.reminders.unshift({ ...body, id: Date.now() });
+        localStorage.setItem('pa_data', JSON.stringify(store));
+        return Promise.resolve({ ok: true });
+      }
+      return Promise.resolve({});
+    }
+
+    // ========== НАВИГАЦИЯ ==========
     document.querySelectorAll('.nav-item').forEach(item => {
       item.addEventListener('click', () => {
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         item.classList.add('active');
         document.getElementById('sec-' + item.dataset.sec).classList.add('active');
+        loadSection(item.dataset.sec);
       });
     });
 
-    // Периоды расходов
-    document.querySelectorAll('.period-tabs .ptab').forEach(tab => {
+    // Периоды
+    document.querySelectorAll('#exp-periods .ptab').forEach(tab => {
       tab.addEventListener('click', () => {
         tab.parentElement.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        // Здесь будет загрузка данных с бэкенда
+        loadExpenses(tab.dataset.period);
+      });
+    });
+    document.querySelectorAll('#proj-periods .ptab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        tab.parentElement.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        loadProjects(tab.dataset.period);
       });
     });
 
-    // Пока Mini App работает в демо-режиме.
-    // В полной версии данные будут подтягиваться через API бота / initData.
-    // Для реального использования нужно поднять небольшой backend (FastAPI),
-    // который принимает initData от Telegram и отдаёт JSON.
+    // ========== ЗАГРУЗКА ДАННЫХ ==========
+    async function loadExpenses(period = 'day') {
+      try {
+        const data = await api('GET', `/api/expenses?period=${period}`);
+        document.getElementById('expenses-total').innerHTML = `${data.total.toFixed(2)} <span class="currency">BYN</span>`;
+        const list = document.getElementById('expenses-list');
+        if (!data.items.length) {
+          list.innerHTML = '<div class="empty">Пока нет расходов</div>';
+          return;
+        }
+        list.innerHTML = data.items.map(i => `
+          <div class="row">
+            <div>
+              <div class="name">${i.description || i.category || 'Расход'}</div>
+              <div class="meta">${i.category || ''} · ${(i.created_at || '').slice(0,10)}</div>
+            </div>
+            <div class="value">${Number(i.amount).toFixed(2)} BYN</div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
-    document.getElementById('subtitle').textContent = 'Данные синхронизируются с ботом';
+    async function loadCapital() {
+      try {
+        const data = await api('GET', '/api/capital');
+        document.getElementById('cap-total-usd').innerHTML = `${data.total.usd.toFixed(2)} <span class="currency">$</span>`;
+        document.getElementById('cap-total-byn').textContent = `${data.total.byn.toFixed(2)} BYN`;
+        const list = document.getElementById('capital-list');
+        if (!data.items.length) {
+          list.innerHTML = '<div class="empty">Капитал пока не добавлен</div>';
+          return;
+        }
+        list.innerHTML = data.items.map(i => `
+          <div class="row">
+            <div class="name">${i.name}</div>
+            <div class="value">${i.amount_usd ? i.amount_usd.toFixed(2) + ' $' : i.amount_byn.toFixed(2) + ' BYN'}</div>
+          </div>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    async function loadProjects(period = 'month') {
+      try {
+        const data = await api('GET', `/api/projects?period=${period}`);
+        document.getElementById('proj-total').innerHTML = `${data.total.usd.toFixed(2)} <span class="currency">$</span>`;
+        const list = document.getElementById('projects-list');
+        if (!data.projects.length) {
+          list.innerHTML = '<div class="empty">Проектов пока нет</div>';
+          return;
+        }
+        list.innerHTML = data.projects.map(p => `
+          <div class="row">
+            <div class="name">${p.name}</div>
+            <div class="value green">+${p.usd.toFixed(2)} $</div>
+          </div>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    async function loadNotes() {
+      try {
+        const data = await api('GET', '/api/notes');
+        const list = document.getElementById('notes-list');
+        if (!data.items.length) {
+          list.innerHTML = '<div class="empty">Заметок пока нет</div>';
+          return;
+        }
+        list.innerHTML = data.items.map(n => `
+          <div class="note-item">
+            ${n.text}
+            <div class="time">${(n.created_at || '').slice(0,16).replace('T',' ')}</div>
+          </div>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    async function loadReminders() {
+      try {
+        const data = await api('GET', '/api/reminders');
+        const list = document.getElementById('reminders-list');
+        if (!data.items.length) {
+          list.innerHTML = '<div class="empty">Напоминаний нет</div>';
+          return;
+        }
+        list.innerHTML = data.items.map(r => `
+          <div class="reminder-item">
+            <div>
+              <div>${r.text}</div>
+              <div class="time">${(r.remind_at || '').slice(0,16).replace('T',' ')}</div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    function loadSection(sec) {
+      if (sec === 'expenses') loadExpenses();
+      if (sec === 'capital') loadCapital();
+      if (sec === 'projects') loadProjects();
+      if (sec === 'notes') loadNotes();
+      if (sec === 'reminders') loadReminders();
+    }
+
+    // ========== МОДАЛКИ ==========
+    function openModal(type) {
+      const modal = document.getElementById('modal');
+      const content = document.getElementById('modal-content');
+      let html = '';
+
+      if (type === 'expense') {
+        html = `
+          <h3>Новый расход</h3>
+          <div class="form-group"><label>Сумма (BYN)</label><input type="number" id="f-amount" step="0.01" placeholder="0.00"></div>
+          <div class="form-group"><label>Категория</label>
+            <select id="f-category">
+              <option>Еда</option><option>Транспорт</option><option>Здоровье</option>
+              <option>Подписки</option><option>Другое</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Описание</label><input type="text" id="f-desc" placeholder="На что потратил"></div>
+          <button class="btn" onclick="saveExpense()">Сохранить</button>
+          <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+        `;
+      }
+      if (type === 'capital') {
+        html = `
+          <h3>Обновить капитал</h3>
+          <div class="form-group"><label>Название</label><input type="text" id="f-name" placeholder="Крипта / Наличные / Карта"></div>
+          <div class="form-group"><label>Сумма $</label><input type="number" id="f-usd" step="0.01" placeholder="0"></div>
+          <div class="form-group"><label>Сумма BYN</label><input type="number" id="f-byn" step="0.01" placeholder="0"></div>
+          <button class="btn" onclick="saveCapital()">Сохранить</button>
+          <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+        `;
+      }
+      if (type === 'profit') {
+        html = `
+          <h3>Добавить профит</h3>
+          <div class="form-group"><label>Проект</label><input type="text" id="f-project" placeholder="крипта / трафик"></div>
+          <div class="form-group"><label>Сумма $</label><input type="number" id="f-usd" step="0.01" placeholder="0"></div>
+          <div class="form-group"><label>Сумма BYN</label><input type="number" id="f-byn" step="0.01" placeholder="0"></div>
+          <button class="btn" onclick="saveProfit()">Сохранить</button>
+          <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+        `;
+      }
+      if (type === 'note') {
+        html = `
+          <h3>Новая заметка</h3>
+          <div class="form-group"><label>Текст</label><textarea id="f-text" rows="4" placeholder="Текст заметки"></textarea></div>
+          <button class="btn" onclick="saveNote()">Сохранить</button>
+          <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+        `;
+      }
+      if (type === 'reminder') {
+        html = `
+          <h3>Новое напоминание</h3>
+          <div class="form-group"><label>Текст</label><input type="text" id="f-text" placeholder="О чём напомнить"></div>
+          <div class="form-group"><label>Дата и время</label><input type="datetime-local" id="f-time"></div>
+          <button class="btn" onclick="saveReminder()">Сохранить</button>
+          <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+        `;
+      }
+
+      content.innerHTML = html;
+      modal.classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('show');
+    }
+
+    async function saveExpense() {
+      const amount = parseFloat(document.getElementById('f-amount').value) || 0;
+      const category = document.getElementById('f-category').value;
+      const description = document.getElementById('f-desc').value;
+      if (!amount) return tg.showAlert('Введите сумму');
+      await api('POST', '/api/expenses', { amount, category, description });
+      closeModal();
+      loadExpenses();
+      tg.HapticFeedback.notificationOccurred('success');
+    }
+
+    async function saveCapital() {
+      const name = document.getElementById('f-name').value.trim();
+      const amount_usd = parseFloat(document.getElementById('f-usd').value) || 0;
+      const amount_byn = parseFloat(document.getElementById('f-byn').value) || 0;
+      if (!name) return tg.showAlert('Введите название');
+      await api('POST', '/api/capital', { name, amount_usd, amount_byn });
+      closeModal();
+      loadCapital();
+      tg.HapticFeedback.notificationOccurred('success');
+    }
+
+    async function saveProfit() {
+      const project = document.getElementById('f-project').value.trim();
+      const amount_usd = parseFloat(document.getElementById('f-usd').value) || 0;
+      const amount_byn = parseFloat(document.getElementById('f-byn').value) || 0;
+      if (!project) return tg.showAlert('Введите название проекта');
+      await api('POST', '/api/projects', { project, amount_usd, amount_byn });
+      closeModal();
+      loadProjects();
+      tg.HapticFeedback.notificationOccurred('success');
+    }
+
+    async function saveNote() {
+      const text = document.getElementById('f-text').value.trim();
+      if (!text) return tg.showAlert('Введите текст');
+      await api('POST', '/api/notes', { text });
+      closeModal();
+      loadNotes();
+      tg.HapticFeedback.notificationOccurred('success');
+    }
+
+    async function saveReminder() {
+      const text = document.getElementById('f-text').value.trim();
+      const remind_at = document.getElementById('f-time').value;
+      if (!text || !remind_at) return tg.showAlert('Заполните все поля');
+      await api('POST', '/api/reminders', { text, remind_at: new Date(remind_at).toISOString() });
+      closeModal();
+      loadReminders();
+      tg.HapticFeedback.notificationOccurred('success');
+    }
+
+    // Старт
+    loadExpenses();
   </script>
 </body>
 </html>
